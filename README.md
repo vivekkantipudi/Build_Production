@@ -1,10 +1,10 @@
-Production Payment Gateway
+## Production Payment Gateway
 
 A resilient, asynchronous payment gateway featuring Redis-based job queues, exponential backoff retries, webhook delivery, and an embeddable JavaScript SDK. This system is designed to handle high-concurrency payment processing with "At-Least-Once" delivery guarantees.
 
 
 
-Setup Instructions
+## Setup Instructions
 
 Prerequisites
 
@@ -27,7 +27,7 @@ Redis
 PostgreSQL
 
 \# Build and start services in the background
-
+```bash
 docker-compose up -d --build
 
 
@@ -35,13 +35,13 @@ docker-compose up -d --build
 \# Verify services are running
 
 docker ps
-
+```
 2\. Start the Frontend SDK Server
 
 The SDK is served separately to simulate a CDN / external host environment.
 
 
-
+```bash
 cd checkout-widget
 
 npm install
@@ -53,13 +53,14 @@ npm run build
 \# Runs on port 3001
 
 node server.js
+```
 
 3\. (Optional) Start Test Merchant Receiver
 
 Use this service to verify webhook deliveries locally.
 
 
-
+```bash
 cd test-merchant
 
 npm install
@@ -69,6 +70,7 @@ npm install
 \# Runs on port 4000
 
 node webhook-receiver.js
+```
 
 Environment Configuration
 
@@ -107,7 +109,7 @@ Endpoint POST /payments
 Headers
 
 Idempotency-Key (Optional): Unique string to prevent duplicate charges
-
+```bash
 Request Body
 
 {
@@ -121,9 +123,10 @@ Request Body
 &nbsp; "order\_id": "order\_12345"
 
 }
+```
 
 Response (201 Created)
-
+```bash
 {
 
 &nbsp; "id": "pay\_a1b2...",
@@ -133,7 +136,7 @@ Response (201 Created)
 &nbsp; "created\_at": "2026-01-23T10:00:00Z"
 
 }
-
+```
 2\. Capture Payment
 
 Captures a successfully authorized payment.
@@ -163,13 +166,14 @@ Starts an asynchronous refund process.
 
 
 Endpoint
-
+```
 POST /payments/{id}/refunds
+```
 
 
 
 Request Body
-
+```bash
 {
 
 &nbsp; "amount": 500,
@@ -177,9 +181,10 @@ Request Body
 &nbsp; "reason": "Customer return"
 
 }
+```
 
 Response (201 Created)
-
+```bash
 {
 
 &nbsp; "id": "rfnd\_x9y8...",
@@ -187,6 +192,7 @@ Response (201 Created)
 &nbsp; "status": "pending"
 
 }
+```
 
 4\. Get Refund Details
 
@@ -196,12 +202,14 @@ Retrieves the status of a refund request.
 
 Endpoint
 
+```
 GET /refunds/{id}
+```
 
 
 
 Response (200 OK)
-
+```
 {
 
 &nbsp; "id": "rfnd\_x9y8...",
@@ -211,6 +219,7 @@ Response (200 OK)
 &nbsp; "processed\_at": "2026-01-23T10:35:00Z"
 
 }
+```
 
 5\. Get Webhook Logs
 
@@ -219,18 +228,20 @@ View the history of webhook delivery attempts.
 
 
 Endpoint
-
+```
 GET /webhooks
+```
 
 
 
 Response (200 OK)
-
+```
 {
 
 &nbsp; "data": \[ ... ]
 
 }
+```
 
 6\. Manual Retry Webhook
 
@@ -255,9 +266,8 @@ Endpoint
 GET /test/jobs/status
 
 
-
 Response (200 OK)
-
+```
 {
 
 &nbsp; "pending": 0,
@@ -267,6 +277,7 @@ Response (200 OK)
 &nbsp; "worker\_status": "running"
 
 }
+```
 
 Testing Instructions
 
