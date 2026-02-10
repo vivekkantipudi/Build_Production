@@ -85,27 +85,28 @@ The system is pre-configured using the `docker-compose.yml` file.
 
 ## API Documentation
 
-Base URL http://localhost:8000/api/v1
+## Base URL http://localhost:8000/api/v1
 
-Authentication
+# Authentication
 
 All endpoints require the following request header: X-Api-Key: key\_test\_123
 
 
 
-1. Create Payment
+### 1. Create Payment
 
 Initiates an asynchronous payment request.
 
 
 
-Endpoint POST /payments
+### Endpoint POST /payments
 
-Headers
+#### Headers
 
 Idempotency-Key (Optional): Unique string to prevent duplicate charges
-```bash
+
 Request Body
+```bash
 
 {
 
@@ -132,20 +133,21 @@ Response (201 Created)
 
 }
 ```
-2. Capture Payment
+### 2. Capture Payment
 
 Captures a successfully authorized payment.
 
 
 
-Endpoint
-
+### Endpoint
+```
 POST /payments/{id}/capture
+```
 
 
 
 Response (200 OK)
-
+```bash
 {
 
 &nbsp; "status": "success",
@@ -153,6 +155,7 @@ Response (200 OK)
 &nbsp; "captured": true
 
 }
+```
 
 3. Initiate Refund
 
@@ -189,7 +192,7 @@ Response (201 Created)
 }
 ```
 
-4. Get Refund Details
+### 4. Get Refund Details
 
 Retrieves the status of a refund request.
 
@@ -216,7 +219,7 @@ Response (200 OK)
 }
 ```
 
-5. Get Webhook Logs
+### 5. Get Webhook Logs
 
 View the history of webhook delivery attempts.
 
@@ -238,31 +241,33 @@ Response (200 OK)
 }
 ```
 
-6. Manual Retry Webhook
+### 6. Manual Retry Webhook
 
 Force an immediate retry for a failed webhook delivery.
 
 
 
 Endpoint
-
+```
 POST /webhooks/{id}/retry
+```
 
 
 
-7. Job Queue Status (Test Endpoint)
+### 7. Job Queue Status (Test Endpoint)
 
 Returns the internal state of the job queue. Required for automated evaluation.
 
 
 
-Endpoint
-
+### Endpoint
+```
 GET /test/jobs/status
+```
 
 
 Response (200 OK)
-```
+```bash
 {
 
 &nbsp; "pending": 0,
@@ -274,11 +279,11 @@ Response (200 OK)
 }
 ```
 
-Testing Instructions
+## Testing Instructions
 
 Merchant Dashboard
 
-URL: http://localhost:3001/dashboard-webhooks.html
+### URL: http://localhost:3001/dashboard-webhooks.html
 
 Features: Configure Webhook URLs, view delivery logs, and manually retry failed webhooks.
 
