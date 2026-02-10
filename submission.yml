@@ -1,0 +1,61 @@
+version: "1.0"
+
+# 1. Setup Phase: Install dependencies and build containers
+setup:
+  - command: "docker-compose build"
+    timeout: 300
+    description: "Building Backend API and Worker images"
+  - command: "cd checkout-widget && npm install && npm run build"
+    timeout: 120
+    description: "Installing and Building Frontend SDK"
+
+# 2. Start Phase: Launch the system
+start:
+  - command: "docker-compose up -d"
+    timeout: 60
+    description: "Starting Redis, Postgres, API, and Worker"
+  - command: "cd checkout-widget && nohup node server.js > frontend.log 2>&1 &"
+    timeout: 10
+    description: "Starting Frontend Server in background"
+
+# 3. Test Phase: Run test suite (Using Verify commands since no separate suite exists)
+test:
+  - command: "echo 'Running smoke tests...'"
+    timeout: 5
+    description: "Placeholder for test suite"
+
+# 4. Verify Phase: Health Checks and Contract Validation
+verify:
+  # 1. Check API & Redis (Existing)
+  - command: "curl -f http://localhost:8080/api/v1/test/jobs/status"
+    timeout: 10
+    description: "Checking API & Redis Connectivity"
+
+  # 2. Check SDK (Existing)
+  - command: "curl -f http://localhost:3001/checkout.js"
+    timeout: 10
+    description: "Checking Frontend SDK availability"
+
+  # 3. Check Worker (Existing)
+  - command: "docker ps | grep gateway_worker"
+    timeout: 5
+    description: "Verifying Worker Container is running"
+
+  # 4. NEW: Verify Authentication & Database connection works
+  - command: "curl -f -H 'X-Api-Key: key_test_123' http://localhost:8080/api/v1/webhooks"
+    timeout: 10
+    description: "Verifying Database Connection and Auth Middleware"
+
+  # 5. NEW: Verify Dashboard is serving content
+  - command: "curl -f http://localhost:3001/dashboard/webhooks"
+    timeout: 10
+    description: "Verifying Dashboard UI availability"
+
+# 5. Shutdown Phase: Cleanup
+shutdown:
+  - command: "docker-compose down"
+    timeout: 30
+    description: "Stopping Docker Services"
+  - command: "pkill -f 'node server.js' || true"
+    timeout: 5
+    description: "Stopping Frontend Server (ignoring error if not running)"
