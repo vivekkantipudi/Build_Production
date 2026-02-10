@@ -76,7 +76,7 @@ node webhook-receiver.js
 
 The system is pre-configured using the docker-compose.yml file.
 
-```table
+```md
 
 Service	Variable	Default Value	Description
 
