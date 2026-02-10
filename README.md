@@ -12,7 +12,7 @@ Docker \& Docker Compose (installed and running)
 
 Node.js v16+ (required for SDK development)
 
-# 1. Start the Infrastructure
+### 1. Start the Infrastructure
 
 This command launches all required services, including:
 
@@ -36,7 +36,7 @@ docker-compose up -d --build
 
 docker ps
 ```
-2\. Start the Frontend SDK Server
+### 2. Start the Frontend SDK Server
 
 The SDK is served separately to simulate a CDN / external host environment.
 
@@ -55,7 +55,7 @@ npm run build
 node server.js
 ```
 
-3\. (Optional) Start Test Merchant Receiver
+### 3. (Optional) Start Test Merchant Receiver
 
 Use this service to verify webhook deliveries locally.
 
@@ -76,7 +76,7 @@ node webhook-receiver.js
 
 The system is pre-configured using the docker-compose.yml file.
 
-
+```
 
 Service	Variable	Default Value	Description
 
@@ -87,6 +87,7 @@ API	REDIS\_URL	redis://redis:6379	Connection to the Redis queue
 Worker	WEBHOOK\_RETRY\_INTERVALS\_TEST	false	Set to true to use 5s retry intervals for testing
 
 Frontend	PORT	3001	Port used to serve checkout.js
+```
 
 ## API Documentation
 
