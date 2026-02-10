@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webhook Dashboard</title>
+    <style>body { font-family: sans-serif; padding: 20px; }</style>
+</head>
+<body>
+    <div data-test-id="webhook-config">
+      <h2>Webhook Configuration</h2>
+        <form data-test-id="webhook-config-form" id="config-form">
+        <div>
+          <label>Webhook URL</label>
+          <input 
+              data-test-id="webhook-url-input"
+              type="url"
+              placeholder="https://yoursite.com/webhook"
+              value="http://host.docker.internal:4000/webhook"
+          />
+        </div>
+        
+        <div>
+          <label>Webhook Secret</label>
+          <span data-test-id="webhook-secret">whsec_test_abc123</span>
+          <button type="button" data-test-id="regenerate-secret-button">
+            Regenerate
+          </button>
+        </div>
+        
+        <button data-test-id="save-webhook-button" type="submit">
+          Save Configuration
+        </button>
+        
+        <button data-test-id="test-webhook-button" type="button" onclick="alert('Test webhook triggered')">
+          Send Test Webhook
+        </button>
+      </form>
+    
+      <h3>Webhook Logs</h3>
+      <table data-test-id="webhook-logs-table" border="1" cellpadding="10" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Status</th>
+            <th>Attempts</th>
+            <th>Last Attempt</th>
+            <th>Response Code</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="logs-body">
+            </tbody>
+      </table>
+    </div>
+
+    <script>
+        // Fetch logs and populate table
+        const API_KEY = 'key_test_123';
+        
+        // UPDATE: Changed port to 8000 to match external Docker port
+        const API_BASE = 'http://localhost:8000/api/v1';
+
+        async function loadLogs() {
+            try {
+                const res = await fetch(`${API_BASE}/webhooks`, {
+                    headers: { 'X-Api-Key': API_KEY }
+                });
+                const json = await res.json();
+                const tbody = document.getElementById('logs-body');
+                tbody.innerHTML = '';
+                
+                json.data.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('data-test-id', 'webhook-log-item');
+                    tr.innerHTML = `
+                        <td data-test-id="webhook-event">${log.event}</td>
+                        <td data-test-id="webhook-status">${log.status}</td>
+                        <td data-test-id="webhook-attempts">${log.attempts}</td>
+                        <td data-test-id="webhook-last-attempt">${log.last_attempt_at || new Date().toLocaleTimeString()}</td>
+                        <td data-test-id="webhook-response-code">${log.response_code}</td>
+                        <td><button data-test-id="retry-webhook-button" onclick="retry('${log.id}')">Retry</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { console.error(e); }
+        }
+        
+        async function retry(id) {
+            await fetch(`${API_BASE}/webhooks/${id}/retry`, {
+                method: 'POST', headers: { 'X-Api-Key': API_KEY }
+            });
+            alert('Retry scheduled');
+            loadLogs();
+        }
+
+        document.getElementById('config-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Config Saved');
+        });
+
+        loadLogs();
+    </script>
+</body>
+</html>

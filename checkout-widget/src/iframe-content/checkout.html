@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 600; }
+        button:disabled { background: #ccc; }
+        .error { color: red; font-size: 14px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <h2 data-test-id="checkout-title">Pay Securely</h2>
+    <div id="error-msg" class="error" data-test-id="payment-error"></div>
+    
+    <form id="payment-form" data-test-id="payment-form">
+        <div class="form-group">
+            <label>Card Number</label>
+            <input type="text" placeholder="4242 4242 4242 4242" data-test-id="card-number-input">
+        </div>
+        <div class="form-group">
+            <label>Expiry</label>
+            <input type="text" placeholder="12/25" data-test-id="card-expiry-input">
+        </div>
+        <button type="submit" id="pay-btn" data-test-id="pay-button">Pay Now</button>
+    </form>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        // FIX: Ensure API hits port 8000 as per requirements
+        const API_URL = 'http://localhost:8000/api/v1/payments'; 
+        
+        const apiKey = urlParams.get('key') || 'key_test_123'; 
+        const orderId = urlParams.get('orderId') || 'order_' + Math.floor(Math.random() * 1000);
+        const amount = urlParams.get('amount') || '5000';
+
+        function sendMessageToParent(type, data) {
+            window.parent.postMessage({ type: type, data: data }, '*');
+        }
+
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('pay-btn');
+            const err = document.getElementById('error-msg');
+            
+            btn.disabled = true; 
+            btn.innerText = "Processing..."; 
+            err.style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Api-Key': apiKey,
+                        'Idempotency-Key': 'key_' + Date.now()
+                    },
+                    body: JSON.stringify({
+                        amount: parseInt(amount),
+                        currency: 'INR',
+                        method: 'card',
+                        order_id: orderId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    sendMessageToParent('payment.success', { paymentId: data.id });
+                    document.body.innerHTML = `
+                        <div style="text-align:center; color:green; padding:20px;" data-test-id="success-message">
+                            <h2>Payment Successful!</h2>
+                            <p>ID: ${data.id}</p>
+                        </div>`;
+                } else {
+                    throw new Error(data.error || 'Payment failed');
+                }
+            } catch (error) {
+                console.error("Payment Error:", error);
+                err.innerText = "Error: " + error.message; 
+                err.style.display = 'block';
+                sendMessageToParent('payment.failed', { error: error.message });
+            } finally {
+                if(btn) {
+                    btn.disabled = false; 
+                    btn.innerText = "Pay Now";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
