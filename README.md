@@ -368,125 +368,53 @@ if (verifySignature(payload, signature, secret)) {
   console.log("Invalid signature ❌");
 }
 ```
-
-
-// Middleware to capture RAW body buffer (Crucial!)
-
-app.use(express.json({
-
-&nbsp;   verify: (req, res, buf) => { 
-
-&nbsp;       req.rawBody = buf; 
-
-&nbsp;   }
-
-}));
-
-
-
-app.post('/webhook', (req, res) => {
-
-&nbsp;   const signature = req.headers\['x-webhook-signature'];
-
-&nbsp;   const secret = 'whsec\_test\_abc123'; // From Dashboard
-
-
-
-&nbsp;   const expected = crypto
-
-&nbsp;       .createHmac('sha256', secret)
-
-&nbsp;       .update(req.rawBody) // Use raw buffer
-
-&nbsp;       .digest('hex');
-
-
-
-&nbsp;   if (signature === expected) {
-
-&nbsp;       console.log('Verified:', req.body.event);
-
-&nbsp;       res.sendStatus(200);
-
-&nbsp;   } else {
-
-&nbsp;       console.log('Forged Request');
-
-&nbsp;       res.sendStatus(401);
-
-&nbsp;   }
-
-});
-
-SDK Integration Guide
+## SDK Integration Guide
 
 Embed the payment gateway on any website using our JavaScript SDK.
 
+---
 
+## 1. Include the Script
 
-1\. Include the Script
+Add the following script tag inside your HTML `<body>`:
 
-Add the following script tag inside your HTML <body>:
-
-
-
+```html
 <script src="http://localhost:3001/checkout.js"></script>
+```
 
-2\. Initialize and Open
+## 2. Initialize and Open
 
 Use the following JavaScript code to initialize the payment gateway and open the checkout modal.
 
-
-
+```js
 const gateway = new PaymentGateway({
+  key: 'key_test_123',      // Your Public API Key
+  orderId: 'order_999',     // Unique Order ID
 
-&nbsp;   key: 'key\_test\_123',        // Your Public API Key
+  onSuccess: (data) => {
+    console.log('Payment Success:', data.paymentId);
+    // Redirect to thank you page
+  },
 
-&nbsp;   orderId: 'order\_999',       // Unique Order ID
-
-&nbsp;   onSuccess: (data) => {
-
-&nbsp;       console.log('Payment Success:', data.paymentId);
-
-&nbsp;       // Redirect to thank you page
-
-&nbsp;   },
-
-&nbsp;   onFailure: (error) => {
-
-&nbsp;       console.error('Payment Failed:', error.message);
-
-&nbsp;   }
-
+  onFailure: (error) => {
+    console.error('Payment Failed:', error.message);
+  }
 });
 
-
-
 // Trigger the checkout modal
-
 gateway.open();
+```
+## Troubleshooting
 
-Troubleshooting
+---
 
-500 Error on "Pay Now"
+### 500 Error on "Pay Now"
 
-Ensure docker-compose services are running
+- Ensure `docker-compose` services are running
+- Confirm the database is properly seeded
+- Try resetting all data:
 
-Confirm the database is properly seeded
-
-Try resetting all data:
-
+```bash
 docker-compose down -v
-
-Webhook Signature Failure (401)
-
-Ensure you are verifying the raw request body
-
-Do not use the parsed JSON object for signature validation
-
-CORS Errors
-
-Confirm the API is running on port 8000 (mapped to 8080)
-
-Ensure the frontend SDK is running on port 3001
+```
 
