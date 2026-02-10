@@ -74,20 +74,14 @@ node webhook-receiver.js
 
 ## Environment Configuration
 
-The system is pre-configured using the docker-compose.yml file.
+The system is pre-configured using the `docker-compose.yml` file.
 
-```md
-
-Service	Variable	Default Value	Description
-
-API	DATABASE\_URL	postgresql://...	Connection string for the PostgreSQL container
-
-API	REDIS\_URL	redis://redis:6379	Connection to the Redis queue
-
-Worker	WEBHOOK\_RETRY\_INTERVALS\_TEST	false	Set to true to use 5s retry intervals for testing
-
-Frontend	PORT	3001	Port used to serve checkout.js
-```
+| Service  | Variable                     | Default Value        | Description                                      |
+|----------|------------------------------|----------------------|--------------------------------------------------|
+| API      | `DATABASE_URI`               | `postgresql://...`   | Connection string for the PostgreSQL container   |
+| API      | `REDIS_URL`                  | `redis://redis:6379` | Connection to the Redis queue                   |
+| Worker   | `WEBHOOK_RETRY_INTERVALS_TEST` | `false`              | Set to `true` to use 5s retry intervals for testing |
+| Frontend | `PORT`                       | `3001`               | Port used to serve `checkout.js`                |
 
 ## API Documentation
 
