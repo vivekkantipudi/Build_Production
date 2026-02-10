@@ -281,41 +281,32 @@ Response (200 OK)
 
 ## Testing Instructions
 
-Merchant Dashboard
+---
 
-### URL: http://localhost:3001/dashboard-webhooks.html
+## Merchant Dashboard
 
-Features: Configure Webhook URLs, view delivery logs, and manually retry failed webhooks.
+- **URL:** http://localhost:3001/dashboard-webhooks.html
+- **Features:** Configure Webhook URLs, view delivery logs, and manually retry failed webhooks.
 
-End-to-End "Happy Path"
+---
 
-Open the checkout page in your browser: http://localhost:3001/checkout.html.
+## End-to-End "Happy Path"
 
+1. Open the checkout page in your browser:  
+   http://localhost:3001/checkout.html
 
+2. Open the browser console (`F12`)
 
-Open the browser console (F12)
+3. Click **Pay Now**
 
+4. Verify the UI behavior:
 
+   - Button changes to **"Processing..."**
+   - Success message is displayed after completion
 
-Click Pay Now
+5. Check the Webhook Receiver terminal:
 
-
-
-Verify the UI behavior:
-
-
-
-Button changes to "Processing..."
-
-Success message is displayed after completion
-
-Check the Webhook Receiver terminal:
-
-Confirm the payment.success event is received
-
-Verify Asynchronous Refund
-
-Copy the payment\_id from the successful payment step.
+   - Confirm the `payment.success` event is received
 
 
 
