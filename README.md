@@ -348,25 +348,32 @@ Webhook signatures are generated using **HMAC-SHA256**:
 The following example demonstrates how to verify webhook signatures using **HMAC-SHA256** in Node.js.
 
 ```js
-const crypto = require("crypto");
+const crypto = require('crypto');
 
-function verifySignature(payload, signature, secret) {
-  const hmac = crypto.createHmac("sha256", secret);
-  hmac.update(payload);
+// Middleware to capture RAW body buffer (Crucial!)
+app.use(express.json({
+    verify: (req, res, buf) => { 
+        req.rawBody = buf; 
+    }
+}));
 
-  return hmac.digest("hex") === signature;
-}
+app.post('/webhook', (req, res) => {
+    const signature = req.headers['x-webhook-signature'];
+    const secret = 'whsec_test_abc123'; // From Dashboard
 
-// Example
-const payload = JSON.stringify(req.body);
-const signature = req.headers["x-webhook-signature"];
-const secret = "your_webhook_secret";
+    const expected = crypto
+        .createHmac('sha256', secret)
+        .update(req.rawBody) // Use raw buffer
+        .digest('hex');
 
-if (verifySignature(payload, signature, secret)) {
-  console.log("Signature verified ✅");
-} else {
-  console.log("Invalid signature ❌");
-}
+    if (signature === expected) {
+        console.log('Verified:', req.body.event);
+        res.sendStatus(200);
+    } else {
+        console.log('Forged Request');
+        res.sendStatus(401);
+    }
+});
 ```
 ## SDK Integration Guide
 
@@ -388,17 +395,15 @@ Use the following JavaScript code to initialize the payment gateway and open the
 
 ```js
 const gateway = new PaymentGateway({
-  key: 'key_test_123',      // Your Public API Key
-  orderId: 'order_999',     // Unique Order ID
-
-  onSuccess: (data) => {
-    console.log('Payment Success:', data.paymentId);
-    // Redirect to thank you page
-  },
-
-  onFailure: (error) => {
-    console.error('Payment Failed:', error.message);
-  }
+    key: 'key_test_123',        // Your Public API Key
+    orderId: 'order_999',       // Unique Order ID
+    onSuccess: (data) => {
+        console.log('Payment Success:', data.paymentId);
+        // Redirect to thank you page
+    },
+    onFailure: (error) => {
+        console.error('Payment Failed:', error.message);
+    }
 });
 
 // Trigger the checkout modal
@@ -417,4 +422,11 @@ gateway.open();
 ```bash
 docker-compose down -v
 ```
-
+## Webhook Signature Failure (401)
+---
+Ensure you are verifying the raw request body
+Do not use the parsed JSON object for signature validation
+## CORS Errors
+---
+Confirm the API is running on port 8000 (mapped to 8080)
+Ensure the frontend SDK is running on port 3001
