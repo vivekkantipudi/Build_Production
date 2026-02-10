@@ -310,40 +310,64 @@ Response (200 OK)
 
 
 
-Run the following curl command:
+## Verify Asynchronous Refund
 
+---
 
+1. Copy the `payment_id` from the successful payment step.
 
-curl -X POST http://localhost:8000/api/v1/payments/{PAYMENT\_ID}/refunds \\
+2. Run the following `curl` command:
 
--H "X-Api-Key: key\_test\_123" \\
+```bash
+curl -X POST http://localhost:8000/api/v1/payments/{PAYMENT_ID}/refunds \
+  -H "X-Api-Key: key_test_123" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 100, "reason": "Test"}'
+```
 
--H "Content-Type: application/json" \\
+3. Observe the webhook receiver for the `refund.processed` event.
 
--d '{"amount": 100, "reason": "Test"}'
+---
 
-Observe the webhook receiver for the refund.processed event.
+## Webhook Integration Guide
 
-Webhook Integration Guide
+Merchants must verify the **X-Webhook-Signature** header to ensure webhook requests are genuine and untampered.
 
-Merchants must verify the X-Webhook-Signature header to ensure webhook requests are genuine and untampered.
+---
 
+## Signature Logic
 
+Webhook signatures are generated using **HMAC-SHA256**:
 
-Signature Logic
+`HMAC-SHA256(Payload_JSON_String, Webhook_Secret)`
 
-Webhook signatures are generated using HMAC-SHA256: HMAC-SHA256( Payload\_JSON\_String, Webhook\_Secret )
+---
 
+## Node.js Verification Example
 
+The following example demonstrates how to verify webhook signatures using **HMAC-SHA256** in Node.js.
 
-Node.js Verification Example
+```js
+const crypto = require("crypto");
 
-The following example demonstrates how to verify webhook signatures using HMAC-SHA256 in Node.js.
+function verifySignature(payload, signature, secret) {
+  const hmac = crypto.createHmac("sha256", secret);
+  hmac.update(payload);
 
+  return hmac.digest("hex") === signature;
+}
 
+// Example
+const payload = JSON.stringify(req.body);
+const signature = req.headers["x-webhook-signature"];
+const secret = "your_webhook_secret";
 
-const crypto = require('crypto');
-
+if (verifySignature(payload, signature, secret)) {
+  console.log("Signature verified ✅");
+} else {
+  console.log("Invalid signature ❌");
+}
+```
 
 
 // Middleware to capture RAW body buffer (Crucial!)
