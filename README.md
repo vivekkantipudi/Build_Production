@@ -12,7 +12,7 @@ Docker \& Docker Compose (installed and running)
 
 Node.js v16+ (required for SDK development)
 
-1\. Start the Infrastructure
+# 1. Start the Infrastructure
 
 This command launches all required services, including:
 
