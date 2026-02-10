@@ -72,7 +72,7 @@ npm install
 node webhook-receiver.js
 ```
 
-Environment Configuration
+## Environment Configuration
 
 The system is pre-configured using the docker-compose.yml file.
 
@@ -88,7 +88,7 @@ Worker	WEBHOOK\_RETRY\_INTERVALS\_TEST	false	Set to true to use 5s retry interva
 
 Frontend	PORT	3001	Port used to serve checkout.js
 
-API Documentation
+## API Documentation
 
 Base URL http://localhost:8000/api/v1
 
@@ -98,7 +98,7 @@ All endpoints require the following request header: X-Api-Key: key\_test\_123
 
 
 
-1\. Create Payment
+1. Create Payment
 
 Initiates an asynchronous payment request.
 
@@ -137,7 +137,7 @@ Response (201 Created)
 
 }
 ```
-2\. Capture Payment
+2. Capture Payment
 
 Captures a successfully authorized payment.
 
@@ -159,7 +159,7 @@ Response (200 OK)
 
 }
 
-3\. Initiate Refund
+3. Initiate Refund
 
 Starts an asynchronous refund process.
 
@@ -194,7 +194,7 @@ Response (201 Created)
 }
 ```
 
-4\. Get Refund Details
+4. Get Refund Details
 
 Retrieves the status of a refund request.
 
@@ -221,7 +221,7 @@ Response (200 OK)
 }
 ```
 
-5\. Get Webhook Logs
+5. Get Webhook Logs
 
 View the history of webhook delivery attempts.
 
@@ -243,7 +243,7 @@ Response (200 OK)
 }
 ```
 
-6\. Manual Retry Webhook
+6. Manual Retry Webhook
 
 Force an immediate retry for a failed webhook delivery.
 
@@ -255,7 +255,7 @@ POST /webhooks/{id}/retry
 
 
 
-7\. Job Queue Status (Test Endpoint)
+7. Job Queue Status (Test Endpoint)
 
 Returns the internal state of the job queue. Required for automated evaluation.
 
