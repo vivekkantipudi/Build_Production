@@ -1,0 +1,163 @@
+openapi: 3.0.0
+info:
+  title: Production Payment Gateway
+  version: 1.0.0
+  description: API documentation for the async payment gateway.
+servers:
+  - url: http://localhost:8080/api/v1
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+security:
+  - ApiKeyAuth: []
+paths:
+  /payments:
+    post:
+      summary: Create a payment
+      description: Initiates an asynchronous payment processing job.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+          required: false
+          description: Unique key to prevent duplicate charges.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - order_id
+              properties:
+                amount: { type: integer, example: 5000 }
+                currency: { type: string, example: "INR" }
+                method: { type: string, example: "card" }
+                order_id: { type: string, example: "order_123" }
+      responses:
+        '201':
+          description: Payment Pending
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string, example: "pending" }
+
+  /payments/{id}/capture:
+    post:
+      summary: Capture a payment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Payment Captured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  captured: { type: boolean, example: true }
+
+  /payments/{id}/refunds:
+    post:
+      summary: Initiate a refund
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+              properties:
+                amount: { type: integer, example: 1000 }
+                reason: { type: string, example: "Customer request" }
+      responses:
+        '201':
+          description: Refund Initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string, example: "pending" }
+
+  /refunds/{id}:
+    get:
+      summary: Get refund details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Refund Details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+                  amount: { type: integer }
+
+  /webhooks:
+    get:
+      summary: List webhook logs
+      responses:
+        '200':
+          description: List of recent webhooks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: 
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        event: { type: string }
+                        status: { type: string }
+
+  /webhooks/{id}/retry:
+    post:
+      summary: Manually retry a webhook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Retry Scheduled
+
+  /test/jobs/status:
+    get:
+      summary: Check worker status
+      security: [] # Public endpoint
+      responses:
+        '200':
+          description: Worker Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
