@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Merchant Shop</title>
+</head>
+<body>
+    <h1>My Awesome T-Shirt Shop</h1>
+    <p>Product: Blue T-Shirt (₹50.00)</p>
+    
+    <button id="pay-button">Pay Now</button>
+
+    <script src="http://localhost:3001/checkout.js"></script>
+
+    <script>
+        document.getElementById('pay-button').addEventListener('click', function() {
+            // Your provided snippet goes here
+            const gateway = new PaymentGateway({
+                key: 'key_test_123',
+                orderId: 'order_' + Math.floor(Math.random() * 1000), // Random Order ID
+                amount: 5000, // Amount in paisa (50.00 INR)
+                onSuccess: (data) => {
+                    console.log('Paid:', data);
+                    alert('Payment Successful! ID: ' + data.paymentId);
+                },
+                onFailure: (err) => {
+                    console.error('Error:', err);
+                    alert('Payment Failed: ' + err.error);
+                },
+                onClose: () => {
+                    console.log('Modal closed');
+                }
+            });
+
+            gateway.open();
+        });
+    </script>
+</body>
+</html>
